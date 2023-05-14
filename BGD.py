@@ -58,4 +58,55 @@ X_test = X[30:]
 y_test = y[30:]
 
 #print(y_test)
+class LinearRegression:
+    def __init__(self, learning_rate=0.01):
+        self.learning_rate = learning_rate
+    
+    def fit(self, X, y, epochs=100, batch_size=10):
+        n, d = X.shape
+        self.W = np.random.randn(d)
+        self.b = 0
+        self.losses = []
+        for epoch in range(epochs):
+            
+            index = np.random.permutation(n) #shuffle
+            X = X[index]
+            y = y[index]
+            # Split the data into batches
+            for i in range(0, n, batch_size):
+                X_batch = X[i:i+batch_size]
+                y_batch = y[i:i+batch_size]
+                #gradient of the loss(del J) based on W and b
+                y_pred = X_batch.dot(self.W) + self.b
+                delta = y_pred - y_batch
+                dW = X_batch.T.dot(delta) / batch_size
+                db = delta.mean(axis=0)
+                
+                self.W -= self.learning_rate * dW
+                self.b -= self.learning_rate * db
+
+            # Compute the loss
+            y_pred = X.dot(self.W) + self.b
+            loss = ((y_pred - y)**2).mean() / 2
+            self.losses.append(loss)
+    
+    def predict(self, X):
+        print("Predicted CO2 emissions",X.dot(self.W) + self.b)
+        return X.dot(self.W) + self.b
+
+#Batch Gradient Descent
+
+bgd = LinearRegression(learning_rate=0.1)
+bgd.fit(X_train, y_train, epochs=100, batch_size=len(X_train))
+y_pred_bgd = bgd.predict(X_test)
+
+mse_bgd = ((y_pred_bgd - y_test)**2).mean()
+print("MSE for Batch Gradient Descent is",mse_bgd)
+
+
+plt.plot(bgd.losses)
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+
+plt.show()
 
